@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>osu! Timing Indicator - 設定</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Meiryo', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #ffffff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 24px;
+      color: #ff66ab;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #00BFFF;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      color: #cccccc;
+    }
+
+    .form-group input[type="text"],
+    .form-group input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      font-size: 14px;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group input[type="number"]:focus {
+      outline: 2px solid #ff66ab;
+    }
+
+    .form-group input[type="range"] {
+      width: 100%;
+      margin-top: 5px;
+    }
+
+    .range-value {
+      text-align: right;
+      font-size: 12px;
+      color: #888888;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: #ff66ab;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: #ff4499;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-drag {
+      background: #00BFFF;
+      color: #ffffff;
+    }
+
+    .btn-drag:hover {
+      background: #0099CC;
+    }
+
+    .btn-drag.active {
+      background: #FF4444;
+    }
+
+    .status {
+      text-align: center;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .status.success {
+      background: rgba(68, 255, 68, 0.2);
+      color: #44FF44;
+    }
+
+    .status.error {
+      background: rgba(255, 68, 68, 0.2);
+      color: #FF4444;
+    }
+
+    .preview {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-top: 15px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 5px;
+    }
+
+    .preview-fast {
+      color: #00BFFF;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .preview-slow {
+      color: #FF4444;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    .info {
+      font-size: 12px;
+      color: #888888;
+      margin-top: 5px;
+    }
+
+    .shortcut-info {
+      text-align: center;
+      font-size: 12px;
+      color: #888888;
+      margin-top: 20px;
+    }
+
+    .shortcut-info kbd {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⏱️ osu! Timing Indicator</h1>
+
+    <div class="section">
+      <div class="section-title">📡 接続設定</div>
+      <div class="form-group">
+        <label for="websocket-url">tosu WebSocket URL</label>
+        <input type="text" id="websocket-url" placeholder="ws://127.0.0.1:24050/ws">
+        <div class="info">tosuのデフォルトポートは24050です</div>
+      </div>
+      <button class="btn-secondary" id="btn-reconnect">再接続</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🎨 表示設定</div>
+      
+      <div class="form-group">
+        <label for="font-size">フォントサイズ: <span id="font-size-value">24</span>px</label>
+        <input type="range" id="font-size" min="12" max="72" value="24">
+      </div>
+
+      <div class="form-group">
+        <label for="opacity">不透明度: <span id="opacity-value">90</span>%</label>
+        <input type="range" id="opacity" min="10" max="100" value="90">
+      </div>
+
+      <div class="form-group">
+        <label for="duration">表示時間: <span id="duration-value">500</span>ms</label>
+        <input type="range" id="duration" min="100" max="2000" step="50" value="500">
+      </div>
+
+      <div class="preview">
+        <span class="preview-fast" id="preview-fast">FAST</span>
+        <span class="preview-slow" id="preview-slow">SLOW</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📍 位置設定</div>
+      
+      <div class="form-group">
+        <label>現在の位置</label>
+        <div style="display: flex; gap: 10px;">
+          <input type="number" id="pos-x" placeholder="X" style="flex: 1;">
+          <input type="number" id="pos-y" placeholder="Y" style="flex: 1;">
+        </div>
+      </div>
+
+      <button class="btn-drag" id="btn-drag">ドラッグで位置調整</button>
+      <div class="info" style="margin-top: 10px;">
+        ボタンを押すとオーバーレイをドラッグして移動できます。<br>
+        移動後、もう一度押して確定してください。
+      </div>
+    </div>
+
+    <div class="button-group">
+      <button class="btn-primary" id="btn-save">設定を保存</button>
+      <button class="btn-secondary" id="btn-reset">リセット</button>
+    </div>
+
+    <div id="status" class="status" style="display: none;"></div>
+
+    <div class="shortcut-info">
+      <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>O</kbd> でこの画面を開けます
+    </div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    // 要素の取得
+    const websocketUrl = document.getElementById('websocket-url');
+    const fontSize = document.getElementById('font-size');
+    const fontSizeValue = document.getElementById('font-size-value');
+    const opacity = document.getElementById('opacity');
+    const opacityValue = document.getElementById('opacity-value');
+    const duration = document.getElementById('duration');
+    const durationValue = document.getElementById('duration-value');
+    const posX = document.getElementById('pos-x');
+    const posY = document.getElementById('pos-y');
+    const previewFast = document.getElementById('preview-fast');
+    const previewSlow = document.getElementById('preview-slow');
+    const btnSave = document.getElementById('btn-save');
+    const btnReset = document.getElementById('btn-reset');
+    const btnReconnect = document.getElementById('btn-reconnect');
+    const btnDrag = document.getElementById('btn-drag');
+    const status = document.getElementById('status');
+
+    let isDragMode = false;
+
+    // 初期設定を読み込み
+    function loadConfig() {
+      const config = ipcRenderer.sendSync('get-config');
+      
+      websocketUrl.value = config.websocketUrl;
+      fontSize.value = config.fontSize;
+      fontSizeValue.textContent = config.fontSize;
+      opacity.value = config.opacity * 100;
+      opacityValue.textContent = Math.round(config.opacity * 100);
+      duration.value = config.displayDuration;
+      durationValue.textContent = config.displayDuration;
+      
+      const pos = ipcRenderer.sendSync('get-window-position');
+      posX.value = pos.x;
+      posY.value = pos.y;
+
+      updatePreview();
+    }
+
+    // プレビューの更新
+    function updatePreview() {
+      const size = fontSize.value + 'px';
+      const op = opacity.value / 100;
+      
+      previewFast.style.fontSize = size;
+      previewFast.style.opacity = op;
+      previewSlow.style.fontSize = size;
+      previewSlow.style.opacity = op;
+    }
+
+    // スライダーのイベント
+    fontSize.addEventListener('input', () => {
+      fontSizeValue.textContent = fontSize.value;
+      updatePreview();
+    });
+
+    opacity.addEventListener('input', () => {
+      opacityValue.textContent = opacity.value;
+      updatePreview();
+    });
+
+    duration.addEventListener('input', () => {
+      durationValue.textContent = duration.value;
+    });
+
+    // 保存ボタン
+    btnSave.addEventListener('click', () => {
+      const config = {
+        websocketUrl: websocketUrl.value,
+        fontSize: parseInt(fontSize.value),
+        opacity: parseInt(opacity.value) / 100,
+        displayDuration: parseInt(duration.value),
+        position: {
+          x: parseInt(posX.value),
+          y: parseInt(posY.value)
+        }
+      };
+
+      ipcRenderer.send('save-config', config);
+      ipcRenderer.send('update-position', config.position);
+
+      showStatus('設定を保存しました', 'success');
+    });
+
+    // リセットボタン
+    btnReset.addEventListener('click', () => {
+      websocketUrl.value = 'ws://127.0.0.1:24050/ws';
+      fontSize.value = 24;
+      fontSizeValue.textContent = '24';
+      opacity.value = 90;
+      opacityValue.textContent = '90';
+      duration.value = 500;
+      durationValue.textContent = '500';
+      posX.value = -1;
+      posY.value = -1;
+      
+      updatePreview();
+      showStatus('デフォルト値にリセットしました', 'success');
+    });
+
+    // 再接続ボタン
+    btnReconnect.addEventListener('click', () => {
+      ipcRenderer.send('save-config', { websocketUrl: websocketUrl.value });
+      ipcRenderer.send('reconnect-websocket');
+      showStatus('再接続を試みています...', 'success');
+    });
+
+    // ドラッグモードボタン
+    btnDrag.addEventListener('click', () => {
+      isDragMode = !isDragMode;
+      
+      if (isDragMode) {
+        ipcRenderer.send('enable-drag-mode');
+        btnDrag.textContent = 'ドラッグモード終了';
+        btnDrag.classList.add('active');
+      } else {
+        ipcRenderer.send('disable-drag-mode');
+        btnDrag.textContent = 'ドラッグで位置調整';
+        btnDrag.classList.remove('active');
+        
+        // 現在の位置を更新
+        const pos = ipcRenderer.sendSync('get-window-position');
+        posX.value = pos.x;
+        posY.value = pos.y;
+      }
+    });
+
+    // ステータス表示
+    function showStatus(message, type) {
+      status.textContent = message;
+      status.className = 'status ' + type;
+      status.style.display = 'block';
+      
+      setTimeout(() => {
+        status.style.display = 'none';
+      }, 3000);
+    }
+
+    // 初期化
+    loadConfig();
+  </script>
+</body>
+</html>
