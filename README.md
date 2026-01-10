@@ -27,13 +27,16 @@ osu!maniaで判定がパーフェクトでなかった場合に、タイミン�
 
 ## インストール
 
-### ビルド済みバイナリを使用する場合
+### 📦 簡単インストール（推奨）
 
-1. [Releases](../../releases) ページから対応するOS用のファイルをダウンロード
-2. ダウンロードしたファイルを解凍・インストール
-3. アプリケーションを起動
+1. [Releases](../../releases/latest) ページから最新のWindows用インストーラーをダウンロード
+   - **インストーラー版**: `osu-Timing-Indicator-Setup-x.x.x.exe`（通常のインストール、推奨）
+   - **ポータブル版**: `osu-Timing-Indicator-x.x.x-portable.exe`（インストール不要、USBメモリでも使用可）
+2. ダウンロードしたファイルを実行
+3. インストーラー版の場合は画面の指示に従ってインストール
+4. デスクトップまたはスタートメニューから起動
 
-### ソースからビルドする場合
+### 🛠️ ソースからビルドする場合
 
 ```bash
 # リポジトリをクローン
@@ -48,22 +51,6 @@ npm run dev
 
 # または、ビルドして起動
 npm run start
-```
-
-### パッケージングする場合
-
-```bash
-# 全プラットフォーム用にビルド
-npm run package
-
-# Windows用のみ
-npm run package:win
-
-# Linux用のみ
-npm run package:linux
-
-# macOS用のみ
-npm run package:mac
 ```
 
 ## 使い方
@@ -86,7 +73,8 @@ npm run package:mac
 | WebSocket URL | tosuの接続先URL | `ws://127.0.0.1:24050/ws` |
 | フォントサイズ | 表示される文字の大きさ | 24px |
 | 不透明度 | インジケーターの透明度 | 90% |
-| 表示時間 | FAST/SLOWが表示される時間 | 500ms |
+| フェードアウト時間 | FAST/SLOWが表示されてから消えるまでの時間 | 2.0秒 |
+| 表示する判定 | どの判定以下で表示するか（1=常に表示、3=200以下など） | 200以下 |
 | 位置 (X, Y) | 画面上の表示位置 | 画面中央 |
 
 ### 位置の調整
@@ -96,18 +84,6 @@ npm run package:mac
 3. オーバーレイ上でマウスをドラッグして位置を調整
 4. もう一度ボタンをクリックして確定
 5. 「設定を保存」ボタンで保存
-
-### WSL（Windows Subsystem for Linux）での使用
-
-WSL上でこのツールを実行し、Windows上のtosuに接続する場合：
-
-1. Windowsでtosuを起動
-2. WSLターミナルで以下を実行してWindowsホストのIPを確認:
-   ```bash
-   cat /etc/resolv.conf | grep nameserver | awk '{print $2}'
-   ```
-3. 設定画面でWebSocket URLを `ws://<WindowsのIP>:24050/ws` に変更
-   - 例: `ws://172.25.192.1:24050/ws`
 
 ## 開発
 
@@ -191,7 +167,3 @@ MIT License
 
 - [tosu](https://github.com/tosuapp/tosu) - osu!のメモリ読み取りツール
 - [osu!](https://osu.ppy.sh/) - リズムゲーム
-
----
-
-Made with ❤️ for the osu! community

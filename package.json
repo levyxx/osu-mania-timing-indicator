@@ -48,14 +48,34 @@
       "src/renderer/**/*",
       "package.json"
     ],
+    "extraResources": [
+      {
+        "from": "README.md",
+        "to": "README.md"
+      }
+    ],
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico"
     },
-    "linux": {
-      "target": "AppImage"
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "osu! Timing Indicator"
     },
-    "mac": {
-      "target": "dmg"
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.exe"
     }
   }
 }
