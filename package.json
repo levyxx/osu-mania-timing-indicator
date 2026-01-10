@@ -52,6 +52,16 @@
       "target": "nsis",
       "icon": "assets/icon.ico"
     },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "osu! Timing Indicator",
+      "allowElevation": true,
+      "runAfterFinish": false,
+      "include": "build/installer.nsh"
+    },
     "linux": {
       "target": "AppImage"
     },

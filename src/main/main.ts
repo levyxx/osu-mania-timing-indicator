@@ -87,6 +87,8 @@ function createSettingsWindow(): void {
     width: 450,
     height: 500,
     resizable: false,
+    skipTaskbar: false,
+    title: 'osu! Timing Indicator - Settings',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
