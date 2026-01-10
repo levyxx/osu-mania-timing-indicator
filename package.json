@@ -1,6 +1,6 @@
 {
   "name": "osu-mania-timing-indicator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fast/Slow timing indicator overlay for osu!mania",
   "main": "dist/main/main.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "copy-html:win": "if not exist dist\\renderer mkdir dist\\renderer && copy src\\renderer\\*.html dist\\renderer\\",
     "build": "tsc",
     "build:full": "npm run build && npm run copy-html",
-    "build:win": "npm run build && npm run copy-html:win", 
+    "build:win": "npm run build && npm run copy-html:win",
     "start": "npm run build && electron .",
     "dev": "tsc && cross-env ELECTRON_DISABLE_SECURITY_WARNINGS=true electron .",
     "watch": "tsc -w",
