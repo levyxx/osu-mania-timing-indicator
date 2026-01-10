@@ -16,8 +16,14 @@ osu!maniaで判定がパーフェクトでなかった場合に、タイミン�
 3. `tosu.exe`を実行
 4. osu!を起動（tosuが自動的に接続します）
 
-## インストール
+## 動作環境
+このツールを使用するには **Node.js** が必要です。
+インストールされていない方は、以下の公式サイトから「LTS（推奨版）」をダウンロードしてインストールしてください。
 
+- [Node.js 公式サイト](https://nodejs.org/)
+
+## インストールと実行
+Windowsでpowershellを開き、以下のコマンドを順に実行してください。
 ```bash
 # リポジトリをクローン
 git clone https://github.com/levyxx/osu-mania-timing-indicator.git
@@ -26,10 +32,7 @@ cd osu-mania-timing-indicator
 # 依存関係をインストール
 npm install
 
-# 開発モードで起動
-npm run dev
-
-# または、ビルドして起動
+# ビルドして起動
 npm run start
 ```
 
