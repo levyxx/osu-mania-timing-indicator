@@ -13,6 +13,7 @@ interface ConfigSchema {
   displayDuration: number;
   fontSize: number;
   opacity: number;
+  judgementThreshold: number; // 表示する判定レベル（1=常に表示, 2=2番目以下, 3=3番目以下...）
 }
 
 const store = new Store<ConfigSchema>({
@@ -25,6 +26,7 @@ const store = new Store<ConfigSchema>({
     displayDuration: 500, // ms
     fontSize: 24,
     opacity: 0.9,
+    judgementThreshold: 3, // デフォルト: 上から3番目以下の判定で表示
   },
 });
 
@@ -164,6 +166,22 @@ interface GameData {
   };
 }
 
+// osu!maniaの判定窓（OD8基準、ms）
+// 1: MAX (Rainbow 300) - ±16ms
+// 2: 300 - ±34ms  
+// 3: 200 - ±67ms
+// 4: 100 - ±97ms
+// 5: 50 - ±121ms
+// 6: Miss - >121ms
+function getJudgementLevel(absError: number): number {
+  if (absError <= 16) return 1;      // MAX (Rainbow 300)
+  if (absError <= 34) return 2;      // 300
+  if (absError <= 67) return 3;      // 200
+  if (absError <= 97) return 4;      // 100
+  if (absError <= 121) return 5;     // 50
+  return 6;                          // Miss
+}
+
 function processGameData(gameData: GameData): void {
   // osu!mania（gameMode === 3）かつプレイ中（state === 2）のみ処理
   const gameMode = gameData.menu?.gameMode;
@@ -188,18 +206,25 @@ function processGameData(gameData: GameData): void {
     const latestError = hitErrors[hitErrors.length - 1];
     lastHitErrorsLength = hitErrors.length;
     
-    // hitErrorが0でない場合（パーフェクト判定でない場合）にFast/Slowを表示
+    // hitErrorが0でない場合にFast/Slowを表示
     // 正の値 = 遅い（Slow）、負の値 = 早い（Fast）
     if (latestError !== 0) {
-      const timing = latestError > 0 ? 'slow' : 'fast';
       const absError = Math.abs(latestError);
+      const judgementLevel = getJudgementLevel(absError);
+      const threshold = store.get('judgementThreshold');
       
-      if (mainWindow) {
-        mainWindow.webContents.send('timing-indicator', {
-          timing,
-          error: absError,
-          duration: store.get('displayDuration'),
-        });
+      // 判定レベルが閾値以上の場合のみ表示
+      // threshold=1: 常に表示, threshold=3: 200以下で表示
+      if (judgementLevel >= threshold) {
+        const timing = latestError > 0 ? 'slow' : 'fast';
+        
+        if (mainWindow) {
+          mainWindow.webContents.send('timing-indicator', {
+            timing,
+            error: absError,
+            judgementLevel,
+          });
+        }
       }
     }
   } else if (hitErrors.length < lastHitErrorsLength) {
@@ -216,6 +241,7 @@ ipcMain.on('get-config', (event) => {
     displayDuration: store.get('displayDuration'),
     fontSize: store.get('fontSize'),
     opacity: store.get('opacity'),
+    judgementThreshold: store.get('judgementThreshold'),
   };
 });
 
@@ -225,6 +251,7 @@ ipcMain.on('save-config', (_, config: Partial<ConfigSchema>) => {
   if (config.displayDuration !== undefined) store.set('displayDuration', config.displayDuration);
   if (config.fontSize !== undefined) store.set('fontSize', config.fontSize);
   if (config.opacity !== undefined) store.set('opacity', config.opacity);
+  if (config.judgementThreshold !== undefined) store.set('judgementThreshold', config.judgementThreshold);
 
   // メインウィンドウに設定変更を通知
   if (mainWindow) {

@@ -239,8 +239,11 @@
       </div>
 
       <div class="form-group">
-        <label for="duration">表示時間: <span id="duration-value">500</span>ms</label>
-        <input type="range" id="duration" min="100" max="2000" step="50" value="500">
+        <label for="judgement-threshold">表示する判定: <span id="judgement-threshold-value">200以下</span></label>
+        <input type="range" id="judgement-threshold" min="1" max="5" value="3">
+        <div class="info">
+          1=常に表示, 2=300以下, 3=200以下, 4=100以下, 5=50以下
+        </div>
       </div>
 
       <div class="preview">
@@ -288,8 +291,8 @@
     const fontSizeValue = document.getElementById('font-size-value');
     const opacity = document.getElementById('opacity');
     const opacityValue = document.getElementById('opacity-value');
-    const duration = document.getElementById('duration');
-    const durationValue = document.getElementById('duration-value');
+    const judgementThreshold = document.getElementById('judgement-threshold');
+    const judgementThresholdValue = document.getElementById('judgement-threshold-value');
     const posX = document.getElementById('pos-x');
     const posY = document.getElementById('pos-y');
     const previewFast = document.getElementById('preview-fast');
@@ -302,6 +305,15 @@
 
     let isDragMode = false;
 
+    // 判定レベルのラベル
+    const judgementLabels = {
+      1: '常に表示',
+      2: '300以下',
+      3: '200以下',
+      4: '100以下',
+      5: '50以下'
+    };
+
     // 初期設定を読み込み
     function loadConfig() {
       const config = ipcRenderer.sendSync('get-config');
@@ -311,8 +323,8 @@
       fontSizeValue.textContent = config.fontSize;
       opacity.value = config.opacity * 100;
       opacityValue.textContent = Math.round(config.opacity * 100);
-      duration.value = config.displayDuration;
-      durationValue.textContent = config.displayDuration;
+      judgementThreshold.value = config.judgementThreshold || 3;
+      judgementThresholdValue.textContent = judgementLabels[config.judgementThreshold || 3];
       
       const pos = ipcRenderer.sendSync('get-window-position');
       posX.value = pos.x;
@@ -343,8 +355,8 @@
       updatePreview();
     });
 
-    duration.addEventListener('input', () => {
-      durationValue.textContent = duration.value;
+    judgementThreshold.addEventListener('input', () => {
+      judgementThresholdValue.textContent = judgementLabels[judgementThreshold.value];
     });
 
     // 保存ボタン
@@ -353,7 +365,7 @@
         websocketUrl: websocketUrl.value,
         fontSize: parseInt(fontSize.value),
         opacity: parseInt(opacity.value) / 100,
-        displayDuration: parseInt(duration.value),
+        judgementThreshold: parseInt(judgementThreshold.value),
         position: {
           x: parseInt(posX.value),
           y: parseInt(posY.value)
@@ -373,8 +385,8 @@
       fontSizeValue.textContent = '24';
       opacity.value = 90;
       opacityValue.textContent = '90';
-      duration.value = 500;
-      durationValue.textContent = '500';
+      judgementThreshold.value = 3;
+      judgementThresholdValue.textContent = '200以下';
       posX.value = -1;
       posY.value = -1;
       
