@@ -96,6 +96,7 @@
     let config = ipcRenderer.sendSync('get-config');
     let baseFontSize = config.fontSize;
     let baseOpacity = config.opacity;
+    let fadeDuration = config.displayDuration || 2000; // ms
 
     // 初期設定を適用
     indicator.style.fontSize = `${baseFontSize}px`;
@@ -130,8 +131,7 @@
         indicator.classList.remove('pop');
       }, 80);
 
-      // 2秒かけてフェードアウト開始
-      const fadeDuration = 2000; // 2秒
+      // 設定された時間でフェードアウト開始
       const startTime = performance.now();
       const startOpacity = baseOpacity;
 
@@ -166,6 +166,9 @@
       }
       if (newConfig.opacity) {
         baseOpacity = newConfig.opacity;
+      }
+      if (newConfig.displayDuration) {
+        fadeDuration = newConfig.displayDuration;
       }
     });
 

@@ -23,7 +23,7 @@ const store = new Store<ConfigSchema>({
       y: -1,
     },
     websocketUrl: 'ws://127.0.0.1:24050/ws',
-    displayDuration: 500, // ms
+    displayDuration: 2000, // ms（デフォルト2秒）
     fontSize: 24,
     opacity: 0.9,
     judgementThreshold: 3, // デフォルト: 上から3番目以下の判定で表示

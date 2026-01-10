@@ -239,6 +239,14 @@
       </div>
 
       <div class="form-group">
+        <label for="fade-duration">フェードアウト時間: <span id="fade-duration-value">2.0</span>秒</label>
+        <input type="range" id="fade-duration" min="0.5" max="5.0" step="0.1" value="2.0">
+        <div class="info">
+          表示されてから消えるまでの時間（0.5～5.0秒）
+        </div>
+      </div>
+
+      <div class="form-group">
         <label for="judgement-threshold">表示する判定: <span id="judgement-threshold-value">200以下</span></label>
         <input type="range" id="judgement-threshold" min="1" max="5" value="3">
         <div class="info">
@@ -291,6 +299,8 @@
     const fontSizeValue = document.getElementById('font-size-value');
     const opacity = document.getElementById('opacity');
     const opacityValue = document.getElementById('opacity-value');
+    const fadeDuration = document.getElementById('fade-duration');
+    const fadeDurationValue = document.getElementById('fade-duration-value');
     const judgementThreshold = document.getElementById('judgement-threshold');
     const judgementThresholdValue = document.getElementById('judgement-threshold-value');
     const posX = document.getElementById('pos-x');
@@ -323,6 +333,8 @@
       fontSizeValue.textContent = config.fontSize;
       opacity.value = config.opacity * 100;
       opacityValue.textContent = Math.round(config.opacity * 100);
+      fadeDuration.value = (config.displayDuration || 2000) / 1000;
+      fadeDurationValue.textContent = ((config.displayDuration || 2000) / 1000).toFixed(1);
       judgementThreshold.value = config.judgementThreshold || 3;
       judgementThresholdValue.textContent = judgementLabels[config.judgementThreshold || 3];
       
@@ -355,6 +367,10 @@
       updatePreview();
     });
 
+    fadeDuration.addEventListener('input', () => {
+      fadeDurationValue.textContent = parseFloat(fadeDuration.value).toFixed(1);
+    });
+
     judgementThreshold.addEventListener('input', () => {
       judgementThresholdValue.textContent = judgementLabels[judgementThreshold.value];
     });
@@ -365,6 +381,7 @@
         websocketUrl: websocketUrl.value,
         fontSize: parseInt(fontSize.value),
         opacity: parseInt(opacity.value) / 100,
+        displayDuration: Math.round(parseFloat(fadeDuration.value) * 1000),
         judgementThreshold: parseInt(judgementThreshold.value),
         position: {
           x: parseInt(posX.value),
@@ -385,6 +402,8 @@
       fontSizeValue.textContent = '24';
       opacity.value = 90;
       opacityValue.textContent = '90';
+      fadeDuration.value = 2.0;
+      fadeDurationValue.textContent = '2.0';
       judgementThreshold.value = 3;
       judgementThresholdValue.textContent = '200以下';
       posX.value = -1;
