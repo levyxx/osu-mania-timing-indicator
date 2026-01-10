@@ -18,10 +18,7 @@ node --version
 # 依存関係のインストール
 npm install
 
-# TypeScriptのウォッチモード
-npm run watch
-
-# 別のターミナルで起動
+# アプリの実行
 npm run dev
 ```
 
