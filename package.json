@@ -4,14 +4,18 @@
   "description": "Fast/Slow timing indicator overlay for osu!mania",
   "main": "dist/main/main.js",
   "scripts": {
+    "copy-html": "mkdir -p dist/renderer && cp src/renderer/*.html dist/renderer/",
+    "copy-html:win": "if not exist dist\\renderer mkdir dist\\renderer && copy src\\renderer\\*.html dist\\renderer\\",
     "build": "tsc",
+    "build:full": "npm run build && npm run copy-html",
     "start": "npm run build && electron .",
-    "dev": "tsc && electron .",
+    "dev": "tsc && ELECTRON_DISABLE_SECURITY_WARNINGS=true electron .",
+    "dev:win": "tsc && set ELECTRON_DISABLE_SECURITY_WARNINGS=true && electron .",
     "watch": "tsc -w",
-    "package": "npm run build && electron-builder",
-    "package:win": "npm run build && electron-builder --win",
-    "package:linux": "npm run build && electron-builder --linux",
-    "package:mac": "npm run build && electron-builder --mac"
+    "package": "npm run build:full && electron-builder",
+    "package:win": "npm run build:full && electron-builder --win",
+    "package:linux": "npm run build:full && electron-builder --linux",
+    "package:mac": "npm run build:full && electron-builder --mac"
   },
   "keywords": [
     "osu",

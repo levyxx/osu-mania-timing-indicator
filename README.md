@@ -97,6 +97,18 @@ npm run package:mac
 4. もう一度ボタンをクリックして確定
 5. 「設定を保存」ボタンで保存
 
+### WSL（Windows Subsystem for Linux）での使用
+
+WSL上でこのツールを実行し、Windows上のtosuに接続する場合：
+
+1. Windowsでtosuを起動
+2. WSLターミナルで以下を実行してWindowsホストのIPを確認:
+   ```bash
+   cat /etc/resolv.conf | grep nameserver | awk '{print $2}'
+   ```
+3. 設定画面でWebSocket URLを `ws://<WindowsのIP>:24050/ws` に変更
+   - 例: `ws://172.25.192.1:24050/ws`
+
 ## 開発
 
 ### 開発環境のセットアップ

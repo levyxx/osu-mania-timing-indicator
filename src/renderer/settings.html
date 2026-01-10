@@ -183,6 +183,14 @@
       margin-top: 5px;
     }
 
+    .info code {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+
     .shortcut-info {
       text-align: center;
       font-size: 12px;
@@ -207,7 +215,12 @@
       <div class="form-group">
         <label for="websocket-url">tosu WebSocket URL</label>
         <input type="text" id="websocket-url" placeholder="ws://127.0.0.1:24050/ws">
-        <div class="info">tosuのデフォルトポートは24050です</div>
+        <div class="info">
+          tosuのデフォルトポートは24050です<br>
+          <strong>WSL使用時:</strong> Windowsのtosuに接続する場合は<br>
+          <code>ws://&lt;WindowsのIP&gt;:24050/ws</code> を指定してください<br>
+          (例: ws://172.x.x.1:24050/ws)
+        </div>
       </div>
       <button class="btn-secondary" id="btn-reconnect">再接続</button>
     </div>

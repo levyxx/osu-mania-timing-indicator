@@ -65,7 +65,11 @@ function createMainWindow(): void {
   // クリックを透過させる
   mainWindow.setIgnoreMouseEvents(true);
 
-  mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+  // src/rendererからHTMLを読み込み（開発時とビルド時の両方に対応）
+  const rendererPath = app.isPackaged
+    ? path.join(__dirname, '../renderer/index.html')
+    : path.join(__dirname, '../../src/renderer/index.html');
+  mainWindow.loadFile(rendererPath);
 
   // 開発時のみDevToolsを開く
   // mainWindow.webContents.openDevTools({ mode: 'detach' });
@@ -87,7 +91,11 @@ function createSettingsWindow(): void {
     },
   });
 
-  settingsWindow.loadFile(path.join(__dirname, '../renderer/settings.html'));
+  // src/rendererからHTMLを読み込み（開発時とビルド時の両方に対応）
+  const settingsPath = app.isPackaged
+    ? path.join(__dirname, '../renderer/settings.html')
+    : path.join(__dirname, '../../src/renderer/settings.html');
+  settingsWindow.loadFile(settingsPath);
 
   settingsWindow.on('closed', () => {
     settingsWindow = null;
