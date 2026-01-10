@@ -34,12 +34,9 @@
         2px 2px 4px rgba(0, 0, 0, 0.8),
         -1px -1px 2px rgba(0, 0, 0, 0.5);
       opacity: 0;
-      transition: opacity 0.1s ease-out;
       letter-spacing: 2px;
-    }
-
-    #indicator.show {
-      opacity: 1;
+      transform: scale(1);
+      transition: transform 0.08s ease-out;
     }
 
     #indicator.fast {
@@ -50,9 +47,8 @@
       color: #FF4444; /* 赤色 */
     }
 
-    #indicator.fade-out {
-      opacity: 0;
-      transition: opacity 0.2s ease-out;
+    #indicator.pop {
+      transform: scale(1.3);
     }
 
     /* ドラッグモード時のスタイル */
@@ -79,21 +75,6 @@
       font-size: 14px;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
     }
-
-    /* 接続状態インジケーター */
-    #connection-status {
-      position: fixed;
-      bottom: 5px;
-      right: 5px;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #FF4444;
-    }
-
-    #connection-status.connected {
-      background: #44FF44;
-    }
   </style>
 </head>
 <body>
@@ -103,29 +84,35 @@
   <div id="drag-overlay">
     <span id="drag-text">ドラッグして移動 | Ctrl+Shift+Oで設定</span>
   </div>
-  <div id="connection-status"></div>
 
   <script>
     const { ipcRenderer } = require('electron');
 
     const indicator = document.getElementById('indicator');
     const dragOverlay = document.getElementById('drag-overlay');
-    const connectionStatus = document.getElementById('connection-status');
 
-    let hideTimeout = null;
+    let fadeAnimation = null;
+    let popTimeout = null;
     let config = ipcRenderer.sendSync('get-config');
+    let baseFontSize = config.fontSize;
+    let baseOpacity = config.opacity;
+    let fadeDuration = config.displayDuration || 2000; // ms
 
     // 初期設定を適用
-    indicator.style.fontSize = `${config.fontSize}px`;
-    indicator.style.opacity = config.opacity;
+    indicator.style.fontSize = `${baseFontSize}px`;
 
     // タイミングインジケーターの表示
     ipcRenderer.on('timing-indicator', (_, data) => {
-      const { timing, error, duration } = data;
+      const { timing } = data;
 
-      // 前のタイムアウトをクリア
-      if (hideTimeout) {
-        clearTimeout(hideTimeout);
+      // 前のアニメーションをキャンセル
+      if (fadeAnimation) {
+        cancelAnimationFrame(fadeAnimation);
+        fadeAnimation = null;
+      }
+      if (popTimeout) {
+        clearTimeout(popTimeout);
+        popTimeout = null;
       }
 
       // クラスをリセット
@@ -134,39 +121,54 @@
       // タイミングに応じてテキストとクラスを設定
       indicator.textContent = timing.toUpperCase();
       indicator.classList.add(timing);
-      indicator.classList.add('show');
+      
+      // 即座に表示＆ポップエフェクト
+      indicator.style.opacity = baseOpacity;
+      indicator.classList.add('pop');
+      
+      // ポップエフェクトを解除（スムーズに元のサイズへ）
+      popTimeout = setTimeout(() => {
+        indicator.classList.remove('pop');
+      }, 80);
 
-      // 指定時間後にフェードアウト
-      hideTimeout = setTimeout(() => {
-        indicator.classList.remove('show');
-        indicator.classList.add('fade-out');
+      // 設定された時間でフェードアウト開始
+      const startTime = performance.now();
+      const startOpacity = baseOpacity;
+
+      function fadeOut(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / fadeDuration, 1);
         
-        setTimeout(() => {
+        // イージング（ease-out）
+        const easeOut = 1 - Math.pow(1 - progress, 2);
+        const currentOpacity = startOpacity * (1 - easeOut);
+        
+        indicator.style.opacity = currentOpacity;
+
+        if (progress < 1) {
+          fadeAnimation = requestAnimationFrame(fadeOut);
+        } else {
           indicator.className = '';
           indicator.textContent = '';
-        }, 200);
-      }, duration || config.displayDuration);
-    });
-
-    // 接続状態の更新
-    ipcRenderer.on('connection-status', (_, connected) => {
-      if (connected) {
-        connectionStatus.classList.add('connected');
-      } else {
-        connectionStatus.classList.remove('connected');
+          indicator.style.opacity = 0;
+          fadeAnimation = null;
+        }
       }
+
+      fadeAnimation = requestAnimationFrame(fadeOut);
     });
 
     // 設定の更新
     ipcRenderer.on('config-updated', (_, newConfig) => {
       if (newConfig.fontSize) {
-        indicator.style.fontSize = `${newConfig.fontSize}px`;
+        baseFontSize = newConfig.fontSize;
+        indicator.style.fontSize = `${baseFontSize}px`;
       }
       if (newConfig.opacity) {
-        indicator.style.opacity = newConfig.opacity;
+        baseOpacity = newConfig.opacity;
       }
       if (newConfig.displayDuration) {
-        config.displayDuration = newConfig.displayDuration;
+        fadeDuration = newConfig.displayDuration;
       }
     });
 
