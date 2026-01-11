@@ -35,6 +35,21 @@ let settingsWindow: BrowserWindow | null = null;
 let ws: WebSocket | null = null;
 let reconnectTimer: NodeJS.Timeout | null = null;
 let lastHitErrorsLength = 0;
+let overlayOnTopTimer: NodeJS.Timeout | null = null;
+let isPlaying = false;
+
+function startOverlayOnTopLoop(): void {
+  if (overlayOnTopTimer) return;
+  overlayOnTopTimer = setInterval(() => {
+    ensureOverlayOnTop();
+  }, 1);
+}
+
+function stopOverlayOnTopLoop(): void {
+  if (!overlayOnTopTimer) return;
+  clearInterval(overlayOnTopTimer);
+  overlayOnTopTimer = null;
+}
 
 function ensureOverlayOnTop(): void {
   if (!mainWindow || mainWindow.isDestroyed()) return;
@@ -48,7 +63,7 @@ function ensureOverlayOnTop(): void {
     mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     mainWindow.setAlwaysOnTop(true, 'screen-saver');
   } else {
-    mainWindow.setAlwaysOnTop(true);
+    mainWindow.setAlwaysOnTop(true, 'screen-saver');
   }
 
   mainWindow.moveTop();
@@ -216,8 +231,18 @@ function processGameData(gameData: GameData): void {
   
   // state: 0=menu, 1=edit, 2=play, 7=resultscreen, etc.
   if (state !== 2) {
+    if (isPlaying) {
+      isPlaying = false;
+      stopOverlayOnTopLoop();
+    }
     lastHitErrorsLength = 0;
     return;
+  }
+
+  if (!isPlaying) {
+    isPlaying = true;
+    ensureOverlayOnTop();
+    startOverlayOnTopLoop();
   }
 
   // maniaモードのチェック（3がmania）
@@ -364,6 +389,7 @@ app.on('window-all-closed', () => {
   if (reconnectTimer) {
     clearTimeout(reconnectTimer);
   }
+  stopOverlayOnTopLoop();
   globalShortcut.unregisterAll();
   if (process.platform !== 'darwin') {
     app.quit();
@@ -371,5 +397,6 @@ app.on('window-all-closed', () => {
 });
 
 app.on('will-quit', () => {
+  stopOverlayOnTopLoop();
   globalShortcut.unregisterAll();
 });
