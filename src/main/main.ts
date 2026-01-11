@@ -36,6 +36,24 @@ let ws: WebSocket | null = null;
 let reconnectTimer: NodeJS.Timeout | null = null;
 let lastHitErrorsLength = 0;
 
+function ensureOverlayOnTop(): void {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+
+  // フルスクリーン上でも見えるようにしつつ、Zオーダー最前面を維持する
+  if (!mainWindow.isVisible()) {
+    mainWindow.showInactive();
+  }
+
+  if (process.platform === 'darwin') {
+    mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    mainWindow.setAlwaysOnTop(true, 'screen-saver');
+  } else {
+    mainWindow.setAlwaysOnTop(true);
+  }
+
+  mainWindow.moveTop();
+}
+
 function createMainWindow(): void {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   
@@ -55,6 +73,7 @@ function createMainWindow(): void {
     transparent: true,
     frame: false,
     alwaysOnTop: true,
+    fullscreenable: false,
     skipTaskbar: true,
     resizable: false,
     focusable: false,
@@ -66,12 +85,18 @@ function createMainWindow(): void {
 
   // クリックを透過させる
   mainWindow.setIgnoreMouseEvents(true);
+  // 透過設定後に最前面を再主張（環境によってZオーダーが変わることがある）
+  ensureOverlayOnTop();
 
   // src/rendererからHTMLを読み込み（開発時とビルド時の両方に対応）
   const rendererPath = app.isPackaged
     ? path.join(__dirname, '../renderer/index.html')
     : path.join(__dirname, '../../src/renderer/index.html');
   mainWindow.loadFile(rendererPath);
+
+  mainWindow.on('ready-to-show', () => {
+    ensureOverlayOnTop();
+  });
 
   // 開発時のみDevToolsを開く
   // mainWindow.webContents.openDevTools({ mode: 'detach' });
@@ -221,6 +246,7 @@ function processGameData(gameData: GameData): void {
         const timing = latestError > 0 ? 'slow' : 'fast';
         
         if (mainWindow) {
+          ensureOverlayOnTop();
           mainWindow.webContents.send('timing-indicator', {
             timing,
             error: absError,
@@ -295,6 +321,7 @@ ipcMain.on('open-settings', () => {
 ipcMain.on('enable-drag-mode', () => {
   if (mainWindow) {
     mainWindow.setIgnoreMouseEvents(false);
+    ensureOverlayOnTop();
     mainWindow.webContents.send('drag-mode', true);
   }
 });
@@ -302,6 +329,7 @@ ipcMain.on('enable-drag-mode', () => {
 ipcMain.on('disable-drag-mode', () => {
   if (mainWindow) {
     mainWindow.setIgnoreMouseEvents(true);
+    ensureOverlayOnTop();
     mainWindow.webContents.send('drag-mode', false);
   }
 });
