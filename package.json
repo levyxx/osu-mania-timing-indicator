@@ -1,6 +1,6 @@
 {
   "name": "osu-mania-timing-indicator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Fast/Slow timing indicator overlay for osu!mania",
   "main": "dist/main/main.js",
   "scripts": {
